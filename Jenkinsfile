@@ -10,11 +10,23 @@ pipeline {
             }
         }
         
+        stage('Setup Virtual Environment') {
+            steps {
+                sh '''
+                    echo "🐍 Creating Python virtual environment..."
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install --upgrade pip
+                '''
+            }
+        }
+        
         stage('Install Dependencies') {
             steps {
                 sh '''
                     echo "📦 Installing Python dependencies..."
-                    pip3 install -r requirements.txt
+                    source venv/bin/activate
+                    pip install -r requirements.txt
                     echo "✅ Dependencies installed"
                 '''
             }
@@ -24,9 +36,10 @@ pipeline {
             steps {
                 sh '''
                     echo "🧪 Testing application..."
+                    source venv/bin/activate
                     
                     # Start the app in background
-                    python3 app.py &
+                    python app.py &
                     APP_PID=$!
                     
                     # Wait for app to start
@@ -70,8 +83,8 @@ pipeline {
                     echo "Date: $(date)" >> build-info.txt
                     echo "Commit: $(git log --oneline -1)" >> build-info.txt
                     
-                    # Create archive
-                    tar -czf calendar-build-${BUILD_NUMBER}.tar.gz *
+                    # Create archive (exclude venv)
+                    tar -czf calendar-build-${BUILD_NUMBER}.tar.gz --exclude=venv *
                     
                     echo "Package: calendar-build-${BUILD_NUMBER}.tar.gz"
                 '''
