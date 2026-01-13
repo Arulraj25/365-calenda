@@ -1,0 +1,62 @@
+[
+  {
+    "date": "01-01",
+    "day": "New Year's Day",
+    "description": "The first day of the year"
+  },
+  {
+    "date": "02-01",
+    "day": "Science Fiction Day",
+    "description": "Celebrate science fiction"
+  },
+  {
+    "date": "03-01",
+    "day": "Festival of Sleep Day",
+    "description": "Time to catch up on sleep"
+  },
+  {
+    "date": "02-14",
+    "day": "Valentine's Day",
+    "description": "Day of love and affection"
+  },
+  {
+    "date": "03-14",
+    "day": "Pi Day",
+    "description": "Celebrate the mathematical constant π"
+  },
+  {
+    "date": "04-01",
+    "day": "April Fools' Day",
+    "description": "Day for harmless pranks"
+  },
+  {
+    "date": "04-22",
+    "day": "Earth Day",
+    "description": "Protect our planet"
+  },
+  {
+    "date": "05-04",
+    "day": "Star Wars Day",
+    "description": "May the Fourth be with you"
+  },
+  {
+    "date": "07-04",
+    "day": "Independence Day",
+    "description": "American independence celebration"
+  },
+  {
+    "date": "10-31",
+    "day": "Halloween",
+    "description": "Spooky fun day"
+  },
+  {
+    "date": "12-25",
+    "day": "Christmas Day",
+    "description": "Celebrate Christmas"
+  },
+  {
+    "date": "12-31",
+    "day": "New Year's Eve",
+    "description": "Ring in the new year"
+  }
+]
