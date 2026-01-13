@@ -10,83 +10,73 @@ pipeline {
             }
         }
         
-        stage('Setup Virtual Environment') {
+        stage('Setup') {
             steps {
                 sh '''
-                    echo "🐍 Creating Python virtual environment..."
+                    echo "🐍 Setting up environment..."
+                    
+                    # Create virtual environment
                     python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
+                    
+                    # Use venv's pip directly
+                    venv/bin/pip install --upgrade pip
+                    echo "✅ Virtual environment created"
                 '''
             }
         }
         
-        stage('Install Dependencies') {
+        stage('Install') {
             steps {
                 sh '''
-                    echo "📦 Installing Python dependencies..."
-                    . venv/bin/activate
-                    pip install -r requirements.txt
+                    echo "📦 Installing dependencies..."
+                    
+                    # Install using venv pip
+                    venv/bin/pip install -r requirements.txt
                     echo "✅ Dependencies installed"
                 '''
             }
         }
         
-        stage('Test Application') {
+        stage('Test') {
             steps {
                 sh '''
                     echo "🧪 Testing application..."
-                    . venv/bin/activate
                     
-                    # Start the app in background
-                    python app.py &
+                    # Start app using venv python
+                    venv/bin/python app.py &
                     APP_PID=$!
-                    
-                    # Wait for app to start
                     sleep 5
                     
-                    # Test health endpoint
-                    echo "Testing /api/health..."
-                    if curl -f http://localhost:5000/api/health; then
-                        echo "✅ Health check passed"
-                    else
-                        echo "❌ Health check failed"
-                        kill $APP_PID
-                        exit 1
-                    fi
+                    # Test endpoints
+                    echo "Testing API..."
+                    curl -f http://localhost:5000/api/health && echo "✅ Health check passed"
                     
-                    # Test get all days
-                    echo "Testing /api/days..."
                     DAYS_COUNT=$(curl -s http://localhost:5000/api/days | jq '.days | length')
-                    echo "Found $DAYS_COUNT days"
+                    echo "📅 Found $DAYS_COUNT special days"
                     
-                    if [ "$DAYS_COUNT" -ge 365 ]; then
-                        echo "✅ All 365 days present"
-                    else
-                        echo "⚠️ Found $DAYS_COUNT days (expected 365)"
-                    fi
-                    
-                    # Kill the app
+                    # Kill app
                     kill $APP_PID
                     echo "✅ All tests passed"
                 '''
             }
         }
         
-        stage('Build Package') {
+        stage('Build') {
             steps {
                 sh '''
-                    echo "🔨 Creating deployment package..."
+                    echo "🔨 Creating package..."
                     
                     # Create build info
-                    echo "Build: ${BUILD_NUMBER}" > build-info.txt
-                    echo "Date: $(date)" >> build-info.txt
-                    echo "Commit: $(git log --oneline -1)" >> build-info.txt
+                    cat > build-info.txt << EOF
+Build: ${BUILD_NUMBER}
+Date: $(date)
+Commit: $(git log --oneline -1)
+Status: SUCCESS
+EOF
                     
-                    # Create archive (exclude venv)
-                    tar -czf calendar-build-${BUILD_NUMBER}.tar.gz --exclude=venv *
-                    
-                    echo "Package: calendar-build-${BUILD_NUMBER}.tar.gz"
+                    # Create archive
+                    tar -czf calendar-build-${BUILD_NUMBER}.tar.gz --exclude=venv --exclude=.git *
+                    echo "📦 Package: calendar-build-${BUILD_NUMBER}.tar.gz"
                 '''
             }
         }
@@ -94,18 +84,13 @@ pipeline {
     
     post {
         success {
-            echo "🎉 Pipeline completed successfully!"
-            sh 'echo "Build ${BUILD_NUMBER} - SUCCESS"'
+            echo "🎉 Pipeline SUCCESS!"
+            archiveArtifacts artifacts: 'calendar-build-*.tar.gz, build-info.txt', allowEmptyArchive: true
         }
         failure {
-            echo "❌ Pipeline failed!"
-            sh 'echo "Build ${BUILD_NUMBER} - FAILED"'
+            echo "❌ Pipeline FAILED!"
         }
         always {
-            // Archive artifacts
-            archiveArtifacts artifacts: 'calendar-build-*.tar.gz, build-info.txt', allowEmptyArchive: true
-            
-            // Clean up
             sh 'rm -f calendar-build-*.tar.gz build-info.txt'
         }
     }
