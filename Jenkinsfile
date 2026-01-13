@@ -23,8 +23,8 @@ pipeline {
                     # Ensure virtual environment binaries are executable
                     chmod -R 755 venv/bin/
                     
-                    # Activate virtual environment and upgrade pip
-                    source venv/bin/activate
+                    # Use . instead of source for POSIX compliance
+                    . venv/bin/activate
                     python -m pip install --upgrade pip
                 '''
             }
@@ -33,7 +33,7 @@ pipeline {
         stage('Install') {
             steps {
                 sh '''
-                    source venv/bin/activate
+                    . venv/bin/activate
                     echo "📦 Installing dependencies..."
                     pip install -r requirements.txt
                     echo "✅ Dependencies installed"
@@ -44,7 +44,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    source venv/bin/activate
+                    . venv/bin/activate
                     echo "🧪 Running tests..."
                     
                     # Test Python files
@@ -110,10 +110,9 @@ pipeline {
             sh '''
                 echo "=== DEBUG INFO ==="
                 echo "Current user: $(whoami)"
+                echo "Shell: $SHELL"
                 echo "Python version: $(python3 --version 2>&1 || echo 'Not found')"
-                echo "Pip version: $(pip --version 2>&1 || echo 'Not found')"
                 echo "Virtual env status:"
-                ls -la venv/ 2>/dev/null || echo "venv directory not found"
                 ls -la venv/bin/ 2>/dev/null || echo "venv/bin directory not found"
             '''
         }
