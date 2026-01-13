@@ -15,7 +15,7 @@ pipeline {
                 sh '''
                     echo "🐍 Creating Python virtual environment..."
                     python3 -m venv venv
-                    source venv/bin/activate
+                    . venv/bin/activate
                     pip install --upgrade pip
                 '''
             }
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 sh '''
                     echo "📦 Installing Python dependencies..."
-                    source venv/bin/activate
+                    . venv/bin/activate
                     pip install -r requirements.txt
                     echo "✅ Dependencies installed"
                 '''
@@ -36,7 +36,7 @@ pipeline {
             steps {
                 sh '''
                     echo "🧪 Testing application..."
-                    source venv/bin/activate
+                    . venv/bin/activate
                     
                     # Start the app in background
                     python app.py &
